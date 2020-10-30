@@ -321,23 +321,24 @@ namespace Nop.Plugin.Api.Services
                 return null;
 
             // Here we expect to get two records, one for the first name and one for the last name.
-            var customerAttributeMappings = (from customer in _customerRepository.Table //NoTracking
+            var customerAttributeMappings = (from _customer in _customerRepository.Table //NoTracking
                                              join attribute in _genericAttributeRepository.Table//NoTracking
-                                                                                                on customer.Id equals attribute.EntityId
-                                             where customer.Id == id &&
+                                                                                                on _customer.Id equals attribute.EntityId
+                                             where _customer.Id == id &&
                                                    attribute.KeyGroup == "Customer"
                                              select new CustomerAttributeMappingDto
                                              {
                                                  Attribute = attribute,
-                                                 Customer = customer
+                                                 Customer = _customer
                                              }).ToList();
 
             CustomerDto customerDto = null;
+            Customer customer = null;
 
             // This is in case we have first and last names set for the customer.
             if (customerAttributeMappings.Count > 0)
             {
-                var customer = customerAttributeMappings.First().Customer;
+                customer = customerAttributeMappings.First().Customer;
                 // The customer object is the same in all mappings.
                 customerDto = customer.ToDto();
 
@@ -400,18 +401,32 @@ namespace Nop.Plugin.Api.Services
             else
             {
                 // This is when we do not have first and last name set.
-                var currentCustomer = _customerRepository.Table.FirstOrDefault(customer => customer.Id == id);
+                customer = _customerRepository.Table.FirstOrDefault(customer => customer.Id == id);
 
-                if (currentCustomer != null)
+                if (customer != null)
                 {
-                    if (showDeleted || !currentCustomer.Deleted)
+                    if (showDeleted || !customer.Deleted)
                     {
-                        customerDto = currentCustomer.ToDto();
+                        customerDto = customer.ToDto();
                     }
                 }
             }
 
             SetNewsletterSubscriptionStatus(customerDto);
+
+
+            /// addresses
+            var addresses = _customerService.GetAddressesByCustomerId(customer.Id);
+            customerDto.Addresses = addresses.Select(a => a.ToDto()).ToList();
+
+            /// billing Address
+            var billingAddress = _customerService.GetCustomerBillingAddress(customer);
+            customerDto.BillingAddress = billingAddress.ToDto();
+
+            /// billing Address
+            var shippingAddress = _customerService.GetCustomerShippingAddress(customer);
+            customerDto.ShippingAddress = billingAddress.ToDto();
+
 
             return customerDto;
         }

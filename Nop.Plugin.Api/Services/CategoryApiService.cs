@@ -24,13 +24,13 @@ namespace Nop.Plugin.Api.Services
             _storeMappingService = storeMappingService;
         }
 
-        public IList<Category> GetCategories(IList<int> ids = null,
+        public IList<Category> GetCategories(IList<int> ids = null, int? ParentCategoryId = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
             int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId, 
             int? productId = null,
             bool? publishedStatus = null, bool? showOnHomePage = null)
         {
-            var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, publishedStatus, showOnHomePage, productId, ids);
+            var query = GetCategoriesQuery(ParentCategoryId, createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, publishedStatus, showOnHomePage, productId, ids);
 
 
             if (sinceId > 0)
@@ -55,13 +55,13 @@ namespace Nop.Plugin.Api.Services
             DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
             bool? publishedStatus = null, int? productId = null)
         {
-            var query = GetCategoriesQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax,
+            var query = GetCategoriesQuery(null, createdAtMin, createdAtMax, updatedAtMin, updatedAtMax,
                                            publishedStatus, null, productId);
 
             return query.Count();
         }
 
-        private IQueryable<Category> GetCategoriesQuery(
+        private IQueryable<Category> GetCategoriesQuery(int? parentCategoryId = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
             bool? publishedStatus = null, bool? showOnHomePage = null, int? productId = null, IList<int> ids = null)
         {
@@ -70,6 +70,11 @@ namespace Nop.Plugin.Api.Services
             if (ids != null && ids.Count > 0)
             {
                 query = query.Where(c => ids.Contains(c.Id));
+            }
+
+            if(parentCategoryId != null)
+            {
+                query = query.Where(c => c.ParentCategoryId == parentCategoryId);
             }
 
             if (publishedStatus != null)

@@ -167,9 +167,45 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetNewProducts(ProductsParametersModel parameters)
         {
-            parameters.Ids = _productService.SearchProducts(markedAsNewOnly: true).Select(product => product.Id).ToList();
+            parameters.Ids = _productService.SearchProducts(
+                markedAsNewOnly: true).Select(product => product.Id).ToList();
             return GetProducts(parameters);
         }
+
+
+        /// <summary>
+        /// Receive a list of new products
+        /// </summary>
+        /// <response code="200">OK</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unauthorized</response>
+
+        [HttpGet]
+        [Route("/api/products/search")]
+        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public IActionResult SearchProducts(SearchProductsParametersModel parameters)
+        {
+            var _enum = (ProductSortingEnum)parameters.OrderBy;
+
+            var allProducts = _productService.SearchProducts(
+                keywords: parameters.Term,
+                orderBy: _enum).ToList();
+
+            IList<ProductDto> productsAsDtos = allProducts.Select(product => _dtoHelper.PrepareProductDTO(product)).ToList();
+
+            var productsRootObject = new ProductsRootObjectDto()
+            {
+                Products = productsAsDtos
+            };
+
+            var json = JsonFieldsSerializer.Serialize(productsRootObject, parameters.Fields);
+
+            return new RawJsonActionResult(json);
+        }
+
 
         /// <summary>
         /// Receive a count of all products

@@ -9,7 +9,7 @@ namespace Nop.Plugin.Api.Services
     {
         Category GetCategoryById(int categoryId);
 
-        IList<Category> GetCategories(IList<int> ids = null,
+        IList<Category> GetCategories(IList<int> ids = null, int? ParentCategoryId = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
             int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId, 
             int? productId = null, bool? publishedStatus = null, bool? showOnHomePage = null);

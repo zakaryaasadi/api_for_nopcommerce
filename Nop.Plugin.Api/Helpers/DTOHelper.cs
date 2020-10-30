@@ -464,7 +464,9 @@ namespace Nop.Plugin.Api.Helpers
         public CustomerDto PrepareCustomerDTO(Customer customer)
         {
             var result = customer.ToDto();
-            var customerRoles = this._customerService.GetCustomerRoles(customer);
+
+            /// customer roles
+            var customerRoles = _customerService.GetCustomerRoles(customer);
             foreach (var item in customerRoles)
             {
                 result.RoleIds.Add(item.Id);

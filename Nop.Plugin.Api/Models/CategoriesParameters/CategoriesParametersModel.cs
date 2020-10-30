@@ -18,6 +18,7 @@ namespace Nop.Plugin.Api.Models.CategoriesParameters
             SinceId = Configurations.DefaultSinceId;
             Fields = string.Empty;
             ShowOnHomePage = null;
+            ParentCategoryId = null;
         }
 
         /// <summary>
@@ -31,6 +32,13 @@ namespace Nop.Plugin.Api.Models.CategoriesParameters
         /// </summary>
         [JsonProperty("limit")]
         public int Limit { get; set; }
+
+
+        /// <summary>
+        /// Amount of results -1
+        /// </summary>
+        [JsonProperty("parent_category_id")]
+        public int? ParentCategoryId { get; set; }
 
         /// <summary>
         /// Page to show (default: 1)
